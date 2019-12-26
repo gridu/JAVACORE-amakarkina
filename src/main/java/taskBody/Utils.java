@@ -5,20 +5,17 @@ import java.util.*;
 
 public class Utils {
 
-    public static List<File> split(File file, long memorySize, File directoryToSave) throws Exception {
+    public static List<File> split(File file, long memorySize, File directoryToSave) {
         if (memorySize <= 0) {
             throw new IllegalArgumentException("Memory size should be more than zero!");
         }
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-
-        long maxSplittedFileSize = memorySize / 2;
         List<File> splittedFiles = new ArrayList<>();
-
         try {
-            List<String> lines = new ArrayList<>();
-            String line = "";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            long maxSplittedFileSize = memorySize / 2;
             try {
+                List<String> lines = new ArrayList<>();
+                String line = "";
                 while (line != null) {
                     long stringSize = 0;
                     while ((stringSize < maxSplittedFileSize) && ((line = reader.readLine()) != null)) {
@@ -30,11 +27,13 @@ public class Utils {
                     splittedFiles.add(saveListToFile(lines, directoryToSave));
                     lines.clear();
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } finally {
+                reader.close();
             }
-        } finally {
-            reader.close();
+        } catch (IOException e) {
+            throw new IllegalArgumentException( "Something goes wrong. Please make sure that there are: \n" +
+                    "1. Test file which contains string for sorting with name testData1 in the folder src/main/resouces/testData \n" +
+                    "2. There are folders: result, sortFilesForTests amd temp in the src/main/resources \n");
         }
         return splittedFiles;
     }
@@ -43,16 +42,15 @@ public class Utils {
     private static File saveListToFile(List<String> lines, File directoryToSave) throws IOException {
         File sortedTempFile = File.createTempFile("temp", ".txt", directoryToSave);
         OutputStream out = new FileOutputStream(sortedTempFile);
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
-            for (String s : lines) {
-                writer.write(s);
-                writer.newLine();
-            }
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        for (String s : lines) {
+            writer.write(s);
+            writer.newLine();
         }
         return sortedTempFile;
     }
 
-    public static void mergeSortedFilesIntoOneFile(List<File> files, File resultFile) throws IOException {
+    public static void mergeSortedFilesIntoOneFile(List<File> files, File resultFile) {
         if (files.size() == 0) {
             throw new IllegalArgumentException("There are no files to merge. Quantity files is 0.");
         }
@@ -63,7 +61,12 @@ public class Utils {
         if (resultFile.exists()) {
             resultFile.delete();
         }
-        resultFile.createNewFile();
+
+        try {
+        resultFile.createNewFile();}
+        catch (IOException ex) {
+            throw new IllegalArgumentException("Something goes wrong. Please make sure that there is folder src/main/resources/result");
+        }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(resultFile, true))) {
             for (File file : files) {

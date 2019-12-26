@@ -10,12 +10,9 @@ public class Main {
         File fileOut = new File(Constants.outputFilePathForTempFiles.toString());
         File resultFile = new File(Constants.outputFilePathForResult.toString(), "result");
 
-        try {
-            List<File> files = Utils.split(file, Constants.memorySize, fileOut);
-            Utils.mergeSortedFilesIntoOneFile(files, resultFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        List<File> files = Utils.split(file, Constants.memorySize, fileOut);
+        Utils.mergeSortedFilesIntoOneFile(files, resultFile);
+
         System.out.println("Sorted file path is " + Constants.outputFilePathForResult.toString() + "/result");
     }
 }

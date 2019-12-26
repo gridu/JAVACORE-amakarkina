@@ -1,0 +1,8 @@
+*.DS_Store 
+.idea/
+SortFileProject.iml
+pom.xml
+target/
+src/test/.DS_Store
+src/main/resources/.DS_Store
+

@@ -5,7 +5,6 @@ import org.hamcrest.core.IsNull;
 import taskBody.Constants;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.After;
@@ -29,12 +28,12 @@ public class TestSplitMethod {
         Assert.assertThat("Temp files number", files.size(), Is.is(5));
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testFileIsNotFound() throws Exception {
         split(new File(Constants.inputFilePath.toString(), "123321.txt"), Constants.memorySize, new File(Constants.outputFilePathForTempFiles.toString()));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void tempDirectoryIsNotFound() throws Exception {
         split(new File(Constants.inputFilePath.toString(), "testData1"), Constants.memorySize, new File("src/kokoko/"));
     }

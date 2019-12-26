@@ -52,7 +52,7 @@ public class TestMergeSortedFilesIntoOneFileMethod {
         mergeSortedFilesIntoOneFile(sortedFiles, resultFileFromTest);
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testWrongPath() throws IOException {
         File folderWithFiles = new File(Constants.inputFilePathForTests.toString());
         List<File> sortedFiles = new ArrayList(Arrays.asList(folderWithFiles.listFiles()));
