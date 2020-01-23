@@ -12,11 +12,3 @@ For all versions of the tasks:
 3) There should be no double processing and lost tasks.
 
 4) Application should be able to work on -Xmx256m
-
-Unfortunately git doesn't accept emplty folder so please before use create follow empty folders:
-
-src/main/resources/sortFilesForTests
-src/main/resources/temp
-src/main/resources/result
-
-Also git doesn't allow to add large file, so please add your test file with name "testData1" to the folder src/main/resources/testData
