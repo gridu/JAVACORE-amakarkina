@@ -1,73 +1,76 @@
 package test;
 
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNull;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Assert;
 import org.junit.Test;
 import taskBody.Constants;
+import taskBody.Utils;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import static org.assertj.core.api.Assertions.*;
 import static taskBody.Utils.mergeSortedFilesIntoOneFile;
+
 
 public class TestMergeSortedFilesIntoOneFileMethod {
 
+    private static final Logger LOGGER = Logger.getLogger(TestMergeSortedFilesIntoOneFileMethod.class.getName());
+
     @Before
-    public void tearUp() throws IOException {
-        createFile("1", String.join("\n", "abc", "xyz"));
-        createFile("2", String.join("\n", "def", "hij"));
-        createFile("3", String.join("\n", "klm", "xyz"));
+    public void tearUp() {
+        UtilsForTests.createFile("1", String.join("\n", "abc", "xyz"));
+        UtilsForTests.createFile("2", String.join("\n", "def", "hij", "kix"));
+        UtilsForTests.createFile("3", String.join("\n", "klm", "trololo", "xyz"));
+    }
+
+    @After
+    public void tearDown() {
+        for (File tempFile : new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString()).listFiles()) {
+            if (tempFile.isFile()) {
+                tempFile.delete();
+            }
+        }
     }
 
     @Test
-    public void testFileMerge() throws IOException {
-        File folderWithFiles = new File(Constants.inputFilePathForTests.toString());
+    public void testFileMerge() {
+        File folderWithFiles = new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString());
         List<File> sortedFiles = new ArrayList(Arrays.asList(folderWithFiles.listFiles()));
-        File resultFileFromTest = new File(Constants.outputFilePathForResult.toString(), "result");
+        Utils.makeDirectoryIfNotExist(Constants.OUTPUT_FILE_PATH_FOR_RESULT);
+        File resultFileFromTest = new File(Constants.OUTPUT_FILE_PATH_FOR_RESULT.toString(), "result");
         mergeSortedFilesIntoOneFile(sortedFiles, resultFileFromTest);
 
-        List<String> stringResults = new ArrayList<String>();
+        List<String> stringResults = new ArrayList<>();
         String line;
         try (BufferedReader br = Files.newBufferedReader(resultFileFromTest.toPath())) {
             while ((line = br.readLine()) != null) {
                 stringResults.add(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "IO exception during reading from the result file from test");
         }
-        Assert.assertThat(stringResults, IsNull.notNullValue());
-        Assert.assertThat(stringResults.size(), Is.is(6));
+        assertThat(stringResults).isNotNull();
+        assertThat(stringResults.size()).isEqualTo(8);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEmptyList() throws IOException {
+    public void testEmptyList() {
         List<File> sortedFiles = new ArrayList<>();
-        File resultFileFromTest = new File(Constants.outputFilePathForResult.toString(), "result");
+        File resultFileFromTest = new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString(), "result");
         mergeSortedFilesIntoOneFile(sortedFiles, resultFileFromTest);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testWrongPath() throws IOException {
-        File folderWithFiles = new File(Constants.inputFilePathForTests.toString());
+    public void testWrongPath() {
+        File folderWithFiles = new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString());
         List<File> sortedFiles = new ArrayList(Arrays.asList(folderWithFiles.listFiles()));
-        File resultFileFromTest = new File(Constants.brokenPath.toString(), "result");
+        File resultFileFromTest = new File(Constants.BROKEN_PATH.toString(), "result");
         mergeSortedFilesIntoOneFile(sortedFiles, resultFileFromTest);
-    }
-
-    private File createFile(String fileName, String fileContent) {
-        File file = Paths.get(Constants.inputFilePathForTests.toString(), fileName).toFile();
-        file.deleteOnExit();
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
-            bw.write(fileContent);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return file;
     }
 }

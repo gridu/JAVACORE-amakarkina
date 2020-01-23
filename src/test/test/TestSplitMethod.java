@@ -1,14 +1,12 @@
 package test;
 
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNull;
 import taskBody.Constants;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 
 import static taskBody.Utils.split;
@@ -17,29 +15,34 @@ public class TestSplitMethod {
 
     @After
     public void tearDown() {
-        for (File tempFile : new File(Constants.outputFilePathForTempFiles.toString()).listFiles())
-            if (tempFile.isFile()) tempFile.delete();
+        for (File tempFile : new File(Constants.OUTPUT_FILE_PATH_FOR_TEMP_FILES.toString()).listFiles()) {
+            if (tempFile.isFile()) {
+                tempFile.delete();
+            }
+        }
     }
 
     @Test
-    public void testFileSplit() throws Exception {
-        List<File> files = split(new File(Constants.inputFilePath.toString(), "testData1"), Constants.memorySize, new File(Constants.outputFilePathForTempFiles.toString()));
-        Assert.assertThat(files, IsNull.notNullValue());
-        Assert.assertThat("Temp files number", files.size(), Is.is(5));
+    public void testFileSplit() {
+        List<File> files = split(new File(Constants.INPUT_FILE_TO_BE_SORTED_PATH_FOR_TESTS.toString(), "testData1"), Constants.MEMORY_SIZE_10MB);
+        assertThat(files).isNotNull();
+        assertThat(files.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testFileSplitForMemorySizeBiggerThanFileSize() throws Exception {
+        List<File> files = split(new File(Constants.INPUT_FILE_TO_BE_SORTED_PATH_FOR_TESTS.toString(), "testData1"), Constants.MEMORY_SIZE);
+        assertThat(files).isNotNull();
+        assertThat(files.size()).isEqualTo(1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFileIsNotFound() throws Exception {
-        split(new File(Constants.inputFilePath.toString(), "123321.txt"), Constants.memorySize, new File(Constants.outputFilePathForTempFiles.toString()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void tempDirectoryIsNotFound() throws Exception {
-        split(new File(Constants.inputFilePath.toString(), "testData1"), Constants.memorySize, new File("src/kokoko/"));
+        split(new File(Constants.INPUT_FILE_PATH.toString(), "123321.txt"), Constants.MEMORY_SIZE);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void wrongMemorySize() throws Exception {
-        split(new File(Constants.inputFilePath.toString(), "testData1"), 0, new File(Constants.outputFilePathForTempFiles.toString()));
+        split(new File(Constants.INPUT_FILE_PATH.toString(), "testData1"), 0);
     }
 }

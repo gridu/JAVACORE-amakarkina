@@ -1,55 +1,71 @@
 package taskBody;
 
+import io.qameta.allure.Step;
+
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Utils {
 
-    public static List<File> split(File file, long memorySize, File directoryToSave) {
+    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
+
+    @Step
+    public static List<File> split(File file, long memorySize) {
         if (memorySize <= 0) {
             throw new IllegalArgumentException("Memory size should be more than zero!");
         }
-        List<File> splittedFiles = new ArrayList<>();
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            long maxSplittedFileSize = memorySize / 2;
-            try {
-                List<String> lines = new ArrayList<>();
-                String line = "";
-                while (line != null) {
-                    long stringSize = 0;
-                    while ((stringSize < maxSplittedFileSize) && ((line = reader.readLine()) != null)) {
-                        lines.add(line);
-                        stringSize += line.getBytes().length;
-                    }
-                    Collections.sort(lines);
 
-                    splittedFiles.add(saveListToFile(lines, directoryToSave));
-                    lines.clear();
+        Utils.makeDirectoryIfNotExist(Constants.OUTPUT_FILE_PATH_FOR_TEMP_FILES);
+        File directoryToSave = new File(Constants.OUTPUT_FILE_PATH_FOR_TEMP_FILES.toString());
+
+        List<File> splittedFiles = new ArrayList<>();
+        long maxSplittedFileSize = memorySize / 2;
+        List<String> lines = new ArrayList<>();
+        String line = "";
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            while (line != null) {
+                long stringSize = 0;
+                while ((stringSize < maxSplittedFileSize) && ((line = reader.readLine()) != null)) {
+                    lines.add(line);
+                    stringSize += line.getBytes().length;
                 }
-            } finally {
-                reader.close();
+
+                Collections.sort(lines);
+                splittedFiles.add(saveListToFile(lines, directoryToSave));
+                lines.clear();
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException( "Something goes wrong. Please make sure that there are: \n" +
+            throw new IllegalArgumentException("Something goes wrong. Please make sure that there are: \n" +
                     "1. Test file which contains string for sorting with name testData1 in the folder src/main/resouces/testData \n" +
                     "2. There are folders: result, sortFilesForTests amd temp in the src/main/resources \n");
         }
         return splittedFiles;
     }
 
+    private static File saveListToFile(List<String> lines, File directoryToSave) {
+        File sortedTempFile = null;
+        try {
+            sortedTempFile = File.createTempFile("temp", ".txt", directoryToSave);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Cannot to create sorted temp file");
+        }
 
-    private static File saveListToFile(List<String> lines, File directoryToSave) throws IOException {
-        File sortedTempFile = File.createTempFile("temp", ".txt", directoryToSave);
-        OutputStream out = new FileOutputStream(sortedTempFile);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        for (String s : lines) {
-            writer.write(s);
-            writer.newLine();
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(sortedTempFile, false))) {
+            for (String s : lines) {
+                bw.write(s + System.lineSeparator());
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Cannot to write to sorted temp file");
         }
         return sortedTempFile;
     }
 
+    @Step
     public static void mergeSortedFilesIntoOneFile(List<File> files, File resultFile) {
         if (files.size() == 0) {
             throw new IllegalArgumentException("There are no files to merge. Quantity files is 0.");
@@ -63,8 +79,8 @@ public class Utils {
         }
 
         try {
-        resultFile.createNewFile();}
-        catch (IOException ex) {
+            resultFile.createNewFile();
+        } catch (IOException ex) {
             throw new IllegalArgumentException("Something goes wrong. Please make sure that there is folder src/main/resources/result");
         }
 
@@ -98,7 +114,7 @@ public class Utils {
             }
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.log(Level.SEVERE, "Cannot to write to result file");
         }
     }
 
@@ -109,5 +125,15 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static void makeDirectoryIfNotExist(Path path) {
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Cannot to create directories for path: " + path.toString());
+            }
+        }
     }
 }
