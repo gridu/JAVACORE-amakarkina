@@ -1,10 +1,11 @@
-package test;
+package tests;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import taskBody.Constants;
-import taskBody.Utils;
+
+import taskBody.*;
+
+
+import org.testng.annotations.*;
+import utils.UtilsForTests;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -14,22 +15,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.assertj.core.api.Assertions.*;
 import static taskBody.Utils.mergeSortedFilesIntoOneFile;
+import static org.assertj.core.api.Assertions.*;
 
 
 public class TestMergeSortedFilesIntoOneFileMethod {
 
     private static final Logger LOGGER = Logger.getLogger(TestMergeSortedFilesIntoOneFileMethod.class.getName());
 
-    @Before
+    @BeforeTest
     public void tearUp() {
         UtilsForTests.createFile("1", String.join("\n", "abc", "xyz"));
         UtilsForTests.createFile("2", String.join("\n", "def", "hij", "kix"));
         UtilsForTests.createFile("3", String.join("\n", "klm", "trololo", "xyz"));
     }
 
-    @After
+    @AfterTest
     public void tearDown() {
         for (File tempFile : new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString()).listFiles()) {
             if (tempFile.isFile()) {
@@ -59,14 +60,14 @@ public class TestMergeSortedFilesIntoOneFileMethod {
         assertThat(stringResults.size()).isEqualTo(8);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = {IllegalArgumentException.class})
     public void testEmptyList() {
         List<File> sortedFiles = new ArrayList<>();
         File resultFileFromTest = new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString(), "result");
         mergeSortedFilesIntoOneFile(sortedFiles, resultFileFromTest);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = {IllegalArgumentException.class})
     public void testWrongPath() {
         File folderWithFiles = new File(Constants.INPUT_FILE_PATH_FOR_TESTS.toString());
         List<File> sortedFiles = new ArrayList(Arrays.asList(folderWithFiles.listFiles()));

@@ -16,4 +16,5 @@ public class Constants {
 
     public static final int MIN_LENGTH_OF_STRING_IN_TEST_FILE = 10;
     public static final int MAX_LENGTH_OF_STRING_IN_TEST_FILE = 20;
+    public static final String longFileName = "1LoremqipsumqdolorqsitqametqqconsectetuerqadipiscingqelitwwsedwdiamqnonummywnibhweuismodetinciduntwutwlaoreetedoloredmagnadaliquamderatdvolutpatasUtswisidenimdaddminimdveniamffquisfnostruddexerciftationdullamcorperfsuscipitdlobortisfnislfutfaliquipfexdeadc";
 }

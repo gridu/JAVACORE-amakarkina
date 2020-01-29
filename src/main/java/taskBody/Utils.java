@@ -19,6 +19,10 @@ public class Utils {
             throw new IllegalArgumentException("Memory size should be more than zero!");
         }
 
+        if (!file.exists()) {
+            throw new IllegalArgumentException("There is no file to be sorted!");
+        }
+
         Utils.makeDirectoryIfNotExist(Constants.OUTPUT_FILE_PATH_FOR_TEMP_FILES);
         File directoryToSave = new File(Constants.OUTPUT_FILE_PATH_FOR_TEMP_FILES.toString());
 
@@ -51,16 +55,12 @@ public class Utils {
         File sortedTempFile = null;
         try {
             sortedTempFile = File.createTempFile("temp", ".txt", directoryToSave);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Cannot to create sorted temp file");
-        }
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(sortedTempFile, false))) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(sortedTempFile, false));
             for (String s : lines) {
                 bw.write(s + System.lineSeparator());
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Cannot to write to sorted temp file");
+            LOGGER.log(Level.SEVERE, "Unable to write to sorted temp file");
         }
         return sortedTempFile;
     }
@@ -114,7 +114,7 @@ public class Utils {
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Cannot to write to result file");
+            LOGGER.log(Level.SEVERE, "Unable to write to result file");
         }
     }
 
@@ -132,7 +132,7 @@ public class Utils {
             try {
                 Files.createDirectories(path);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Cannot to create directories for path: " + path.toString());
+                LOGGER.log(Level.SEVERE, "Unable to create directories for path: " + path.toString());
             }
         }
     }

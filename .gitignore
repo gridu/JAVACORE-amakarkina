@@ -2,6 +2,6 @@
 .idea/
 SortFileProject.iml
 target/
-src/test/.DS_Store
+src/java/.DS_Store
 src/main/resources/.DS_Store
 
